@@ -61,6 +61,11 @@ public class TutorialController {
         return CustomResponseHandler.generateResponse("Tutorial encontrado",HttpStatus.OK, tutorial) ;
     }
 
+    /**
+     *
+     * @param tutorial
+     * @return
+     */
     @PostMapping("/tutorial")
     public ResponseEntity<Object> createTutorial(@RequestBody Tutorial tutorial) {
 
@@ -94,6 +99,11 @@ public class TutorialController {
 
     }
 
+    /**
+     *
+     * @param id
+     * @return
+     */
     @DeleteMapping("/tutorial/{id}")
     public ResponseEntity<Object> deleteTutorial(@PathVariable("id") long id) {
         tutorialRepository.deleteById(id);
@@ -103,6 +113,10 @@ public class TutorialController {
 
     }
 
+    /**
+     *
+     * @return
+     */
     @DeleteMapping("/tutorial")
     public ResponseEntity<Object> deleteAllTutorials() {
         tutorialRepository.deleteAll();
@@ -111,6 +125,10 @@ public class TutorialController {
                 ,HttpStatus.NO_CONTENT, "") ;
     }
 
+    /**
+     *
+     * @return
+     */
     @GetMapping("/tutorial/published")
     public ResponseEntity<Object> findByPublished() {
         List<Tutorial> tutorials = tutorialRepository.findByPublished(true);
@@ -124,94 +142,6 @@ public class TutorialController {
         return CustomResponseHandler.generateResponse("Listado de tutoriales"
                 ,HttpStatus.OK, tutorials) ;
     }
-
-/*
-    private final ITutorialService tutorialService;
-
-    @GetMapping(path= "/tutorial/listar", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getAllTutorials() {
-        List<TutorialResponse> tutorialResponse = new ArrayList<TutorialResponse>();
-
-        tutorialResponse = tutorialService.findAll();
-
-        if (tutorialResponse.isEmpty()) {
-            return CustomResponseHandler.generateResponse("Listado vacio",HttpStatus.NO_CONTENT, tutorialResponse) ;
-        }
-        return CustomResponseHandler.generateResponse("listado de tutoriales",HttpStatus.OK, tutorialResponse) ;
-
-    }
-
-    @GetMapping(path = "/tutorial/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getTutorialById(@PathVariable("id") long id) {
-
-        Optional<TutorialResponse> tutorialResponseOptional = tutorialService.findById(id);
-
-        if(tutorialResponseOptional.isPresent()) {
-            return CustomResponseHandler.
-                    generateResponse("Tutorial encontrado", HttpStatus.OK,tutorialResponseOptional.get());
-        }else {
-            throw new TutorialNotFoundException("Tutorial no existe");
-        }
-    }
-
-    @PostMapping(path = "/tutorial/create", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> save(@RequestBody @Valid @NotNull TutorialRequest tutorialRequest, BindingResult bidingResult) {
-
-        if(bidingResult.hasErrors()){
-            return CustomResponseHandler.
-                    generateResponse(bidingResult
-                                    .getAllErrors()
-                                    .stream()
-                                    .map(ObjectError::getDefaultMessage)
-                                    .collect(Collectors.joining()),
-                            HttpStatus.BAD_REQUEST,
-                            tutorialRequest);
-        }
-
-
-        TutorialResponse tutorialResponse = tutorialService.saveTutorial(tutorialRequest);
-        log.info("Tutorial {} guardado ", tutorialResponse.getId());
-        return CustomResponseHandler.generateResponse("Tutorial Save",HttpStatus.CREATED, tutorialResponse) ;
-
-    }
-*/
-    /*@PutMapping("/tutorials/{id}")
-    public ResponseEntity<Tutorial> updateTutorial(@PathVariable("id") long id, @RequestBody Tutorial tutorial) {
-        Tutorial _tutorial = tutorialRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found Tutorial with id = " + id));
-
-        _tutorial.setTitle(tutorial.getTitle());
-        _tutorial.setDescription(tutorial.getDescription());
-        _tutorial.setPublished(tutorial.isPublished());
-
-        return new ResponseEntity<>(tutorialRepository.save(_tutorial), HttpStatus.OK);
-    }
-
-    @DeleteMapping("/tutorials/{id}")
-    public ResponseEntity<HttpStatus> deleteTutorial(@PathVariable("id") long id) {
-        tutorialRepository.deleteById(id);
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @DeleteMapping("/tutorials")
-    public ResponseEntity<HttpStatus> deleteAllTutorials() {
-        tutorialRepository.deleteAll();
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @GetMapping("/tutorials/published")
-    public ResponseEntity<List<Tutorial>> findByPublished() {
-        List<Tutorial> tutorials = tutorialRepository.findByPublished(true);
-
-        if (tutorials.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
-        return new ResponseEntity<>(tutorials, HttpStatus.OK);
-    }*/
-
 
 
 }

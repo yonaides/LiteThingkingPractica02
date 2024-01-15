@@ -26,12 +26,21 @@ public class TagController {
     private final TutorialRepository tutorialRepository;
     private final TagRepository tagRepository;
 
+    /**
+     *
+     * @param tutorialRepository
+     * @param tagRepository
+     */
     @Autowired
     public TagController(TutorialRepository tutorialRepository, TagRepository tagRepository) {
         this.tutorialRepository = tutorialRepository;
         this.tagRepository = tagRepository;
     }
 
+    /**
+     *
+     * @return
+     */
     @GetMapping("/tags")
     public ResponseEntity<Object> getAllTags() {
         List<Tag> tagList = new ArrayList<Tag>();
@@ -45,6 +54,11 @@ public class TagController {
 
     }
 
+    /**
+     *
+     * @param tutorialId
+     * @return
+     */
     @GetMapping("/tutorials/{tutorialId}/tags")
     public ResponseEntity<Object> getAllTagsByTutorialId(@PathVariable(value = "tutorialId") Long tutorialId) {
         if (!tutorialRepository.existsById(tutorialId)) {
@@ -56,6 +70,11 @@ public class TagController {
 
     }
 
+    /**
+     *
+     * @param id
+     * @return
+     */
     @GetMapping("/tags/{id}")
     public ResponseEntity<Object> getTagsById(@PathVariable(value = "id") Long id) {
         Tag tag = tagRepository.findById(id)
@@ -64,6 +83,11 @@ public class TagController {
         return CustomResponseHandler.generateResponse("Tag encontrado",HttpStatus.OK, tag) ;
     }
 
+    /**
+     *
+     * @param tagId
+     * @return
+     */
     @GetMapping("/tags/{tagId}/tutorials")
     public ResponseEntity<Object> getAllTutorialsByTagId(@PathVariable(value = "tagId") Long tagId) {
         if (!tagRepository.existsById(tagId)) {
@@ -75,6 +99,12 @@ public class TagController {
 
     }
 
+    /**
+     *
+     * @param tutorialId
+     * @param tagRequest
+     * @return
+     */
     @PostMapping("/tutorials/{tutorialId}/tags")
     public ResponseEntity<Object> addTag(@PathVariable(value = "tutorialId") Long tutorialId,
                                          @RequestBody Tag tagRequest) {
