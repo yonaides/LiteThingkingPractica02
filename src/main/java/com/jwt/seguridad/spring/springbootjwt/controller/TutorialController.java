@@ -1,29 +1,36 @@
 package com.jwt.seguridad.spring.springbootjwt.controller;
 
-import com.jwt.seguridad.spring.springbootjwt.entity.Tutorial;
+import com.jwt.seguridad.spring.springbootjwt.dto.TutorialDto;
+import com.jwt.seguridad.spring.springbootjwt.entity.TutorialEntity;
 import com.jwt.seguridad.spring.springbootjwt.exception.TutorialNotFoundException;
-import com.jwt.seguridad.spring.springbootjwt.repository.TutorialRepository;
+import com.jwt.seguridad.spring.springbootjwt.helper.CheckRequestErrorHandler;
+import com.jwt.seguridad.spring.springbootjwt.mapper.mappers.Mapper;
 import com.jwt.seguridad.spring.springbootjwt.response.CustomResponseHandler;
+import com.jwt.seguridad.spring.springbootjwt.services.ITutorialService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/api")
 @Slf4j
 public class TutorialController {
 
-    private final  TutorialRepository tutorialRepository;
+    private final ITutorialService tutorialService;
+    private final Mapper<TutorialEntity, TutorialDto> tutorialMapper;
 
     @Autowired
-    public TutorialController(TutorialRepository tutorialRepository) {
-        this.tutorialRepository = tutorialRepository;
+    public TutorialController(ITutorialService tutorialService,
+                              Mapper<TutorialEntity, TutorialDto> tutorialMapper) {
+        this.tutorialService = tutorialService;
+        this.tutorialMapper = tutorialMapper;
     }
 
     /**
@@ -33,19 +40,22 @@ public class TutorialController {
      */
     @GetMapping("/tutorial")
     public ResponseEntity<Object> getAllTutorials(@RequestParam(required = false) String title) {
-        List<Tutorial> tutorials = new ArrayList<Tutorial>();
+        List<TutorialDto> tutorialsDto;
+        List<TutorialEntity> listadoTutoriales = new ArrayList<>();
 
-        if (title == null)
-            tutorialRepository.findAll().forEach(tutorials::add);
-        else
-            tutorialRepository.findByTitleContaining(title).forEach(tutorials::add);
-
-        if (tutorials.isEmpty()) {
-            return CustomResponseHandler.generateResponse("Listado de tutoriales vacio",HttpStatus.NO_CONTENT, tutorials) ;
-
+        if (title == null) {
+            tutorialService.findAll().forEach(listadoTutoriales::add);
+        }else{
+            tutorialService.findByTitleContaining(title).forEach(listadoTutoriales::add);
         }
 
-        return CustomResponseHandler.generateResponse("listado de tutoriales",HttpStatus.OK, tutorials) ;
+        tutorialsDto = listadoTutoriales.stream().map(this::mapToTutorialDto).toList();
+
+        if (tutorialsDto.isEmpty()) {
+            return CustomResponseHandler.generateResponse("Listado de tutoriales vacio",HttpStatus.NO_CONTENT, tutorialsDto) ;
+        }
+
+        return CustomResponseHandler.generateResponse("listado de tutoriales",HttpStatus.OK, tutorialsDto) ;
     }
 
     /**
@@ -55,48 +65,66 @@ public class TutorialController {
      */
     @GetMapping("/tutorial/{id}")
     public ResponseEntity<Object> getTutorialById(@PathVariable("id") long id) {
-        Tutorial tutorial = tutorialRepository.findById(id)
+        TutorialEntity tutorial = tutorialService.findById(id)
                 .orElseThrow(() -> new TutorialNotFoundException("Tutorial no encontrado Id = " + id));
 
-        return CustomResponseHandler.generateResponse("Tutorial encontrado",HttpStatus.OK, tutorial) ;
+        TutorialDto tutorialDto = tutorialMapper.mapTo(tutorial);
+        return CustomResponseHandler.generateResponse("Tutorial encontrado",HttpStatus.OK, tutorialDto) ;
     }
 
     /**
      *
-     * @param tutorial
+     * @param tutorialDto
+     * @param bidingResult
      * @return
      */
     @PostMapping("/tutorial")
-    public ResponseEntity<Object> createTutorial(@RequestBody Tutorial tutorial) {
+    public ResponseEntity<Object> createTutorial(@RequestBody @Valid @NotNull TutorialDto tutorialDto, BindingResult bidingResult) {
 
-        Tutorial tutorialNew = new Tutorial();
-        tutorialNew.setTitle(tutorial.getTitle());
-        tutorialNew.setDescription(tutorial.getDescription());
-        tutorialNew.setPublished(tutorial.isPublished());
+        if(bidingResult.hasErrors()){
+            return CheckRequestErrorHandler.responseErrorsMessage(bidingResult, tutorialDto);
+        }
 
-        return CustomResponseHandler.generateResponse("Tutorial encontrado"
-                ,HttpStatus.OK, tutorialRepository.save(tutorialNew)) ;
+        TutorialEntity tutorialEntity = tutorialMapper.mapFrom(tutorialDto);
+        TutorialEntity tutorialEntitySave =  tutorialService.save(tutorialEntity);
+        TutorialDto tutorialDtoSve = tutorialMapper.mapTo(tutorialEntitySave);
+
+        return CustomResponseHandler.generateResponse("Tutorial creado"
+                ,HttpStatus.OK, tutorialDtoSve) ;
 
     }
 
     /**
      *
      * @param id
-     * @param tutorial
+     * @param tutorialDto
+     * @param bidingResult
      * @return
      */
     @PutMapping("/tutorial/{id}")
-    public ResponseEntity<Object> updateTutorial(@PathVariable("id") long id, @RequestBody Tutorial tutorial) {
-        Tutorial tutorialEditado = tutorialRepository.findById(id)
+    public ResponseEntity<Object> updateTutorial(@PathVariable("id") long id,
+                                                 @Valid
+                                                 @NotNull
+                                                 @RequestBody
+                                                 TutorialDto tutorialDto,
+                                                 BindingResult bidingResult) {
+
+        if(bidingResult.hasErrors()){
+            return CheckRequestErrorHandler.responseErrorsMessage(bidingResult, tutorialDto);
+        }
+
+        TutorialEntity tutorialEntity = tutorialService.findById(id)
                 .orElseThrow(() -> new TutorialNotFoundException("Tutorial no encontrado = " + id));
 
-        tutorialEditado.setTitle(tutorial.getTitle());
-        tutorialEditado.setDescription(tutorial.getDescription());
-        tutorialEditado.setPublished(tutorial.isPublished());
+        tutorialEntity.setTitle(tutorialDto.getTitle());
+        tutorialEntity.setDescription(tutorialDto.getDescription());
+        tutorialEntity.setPublished(tutorialDto.isPublished());
+
+        TutorialEntity tutorialSave = tutorialService.save(tutorialEntity);
+        TutorialDto tutorialDtoSave = tutorialMapper.mapTo(tutorialSave);
 
         return CustomResponseHandler.generateResponse("Tutorial modificado"
-                ,HttpStatus.OK, tutorialRepository.save(tutorialEditado));
-
+                ,HttpStatus.OK, tutorialDtoSave);
     }
 
     /**
@@ -106,7 +134,7 @@ public class TutorialController {
      */
     @DeleteMapping("/tutorial/{id}")
     public ResponseEntity<Object> deleteTutorial(@PathVariable("id") long id) {
-        tutorialRepository.deleteById(id);
+        tutorialService.deleteById(id);
 
         return CustomResponseHandler.generateResponse("Tutorial eliminado"
                 ,HttpStatus.NO_CONTENT, id) ;
@@ -119,7 +147,7 @@ public class TutorialController {
      */
     @DeleteMapping("/tutorial")
     public ResponseEntity<Object> deleteAllTutorials() {
-        tutorialRepository.deleteAll();
+        tutorialService.deleteAll();
 
         return CustomResponseHandler.generateResponse("Todos los tutoriales elimados"
                 ,HttpStatus.NO_CONTENT, "") ;
@@ -131,7 +159,7 @@ public class TutorialController {
      */
     @GetMapping("/tutorial/published")
     public ResponseEntity<Object> findByPublished() {
-        List<Tutorial> tutorials = tutorialRepository.findByPublished(true);
+        List<TutorialEntity> tutorials = tutorialService.findByPublished(true);
 
         if (tutorials.isEmpty()) {
 
@@ -139,9 +167,12 @@ public class TutorialController {
                     ,HttpStatus.NO_CONTENT, tutorials) ;
         }
 
-        return CustomResponseHandler.generateResponse("Listado de tutoriales"
+        return CustomResponseHandler.generateResponse("Listado de tutoriales publicados"
                 ,HttpStatus.OK, tutorials) ;
     }
 
+    private TutorialDto mapToTutorialDto(TutorialEntity tutorial) {
+        return tutorialMapper.mapTo(tutorial);
+    }
 
 }

@@ -14,7 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Tag  {
+public class TagEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -29,6 +29,6 @@ public class Tag  {
             },
             mappedBy = "tags")
     @JsonIgnore
-    private Set<Tutorial> tutorials = new HashSet<>();
+    private Set<TutorialEntity> tutorials = new HashSet<>();
 
 }

@@ -8,12 +8,23 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler  {
 
+    /**
+     *
+     * @param exception
+     * @return
+     */
     @ExceptionHandler({TutorialNotFoundException.class})
     public ResponseEntity<Object> handleTutorialNotFoundException(TutorialNotFoundException exception) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(exception.getMessage());
     }
+
+    /**
+     *
+     * @param exception
+     * @return
+     */
     @ExceptionHandler({RuntimeExceptionError.class})
     public ResponseEntity<Object> handleRuntimeException(RuntimeException exception) {
         return ResponseEntity
@@ -21,6 +32,11 @@ public class GlobalExceptionHandler  {
                 .body(exception.getMessage());
     }
 
+    /**
+     *
+     * @param exception
+     * @return
+     */
     @ExceptionHandler({ResourceNotFoundException.class})
     public ResponseEntity<Object> handleResourceNotFoundException(TutorialNotFoundException exception) {
         return ResponseEntity

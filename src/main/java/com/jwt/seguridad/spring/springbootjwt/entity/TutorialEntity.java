@@ -5,10 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.io.Serializable;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,7 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Tutorial implements Serializable {
+public class TutorialEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,8 +40,7 @@ public class Tutorial implements Serializable {
             joinColumns = { @JoinColumn(name = "tutorial_id") },
             inverseJoinColumns = { @JoinColumn(name = "tag_id") })
     @JsonIgnore
-    private Set<Tag> tags = new HashSet<>();
-
+    private Set<TagEntity> tags = new HashSet<>();
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -56,13 +52,11 @@ public class Tutorial implements Serializable {
     @Column(name = "modified_date")
     private java.util.Calendar modifiedDate;
 
-
-
     /**
      *
      * @param tag
      */
-    public void addTag(Tag tag) {
+    public void addTag(TagEntity tag) {
         this.tags.add(tag);
         tag.getTutorials().add(this);
     }
@@ -72,7 +66,7 @@ public class Tutorial implements Serializable {
      * @param tagId
      */
     public void removeTag(long tagId) {
-        Tag tag = this.tags.stream().filter(t -> t.getId() == tagId).findFirst().orElse(null);
+        TagEntity tag = this.tags.stream().filter(t -> t.getId() == tagId).findFirst().orElse(null);
         if (tag != null) {
             this.tags.remove(tag);
             tag.getTutorials().remove(this);
