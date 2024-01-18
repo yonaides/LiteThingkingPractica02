@@ -4,8 +4,9 @@ import com.jwt.seguridad.spring.springbootjwt.entity.TutorialEntity;
 import com.jwt.seguridad.spring.springbootjwt.repository.TutorialRepository;
 import com.jwt.seguridad.spring.springbootjwt.services.ITutorialService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -82,5 +83,14 @@ public class TutorialServiceImp implements ITutorialService {
     @Override
     public void deleteAll() {
         tutorialRepository.deleteAll();
+    }
+
+    /**
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Page<TutorialEntity> findAll(Pageable pageable) {
+        return tutorialRepository.findAll(pageable);
     }
 }

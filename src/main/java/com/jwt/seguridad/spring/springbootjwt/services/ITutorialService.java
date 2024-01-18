@@ -1,6 +1,8 @@
 package com.jwt.seguridad.spring.springbootjwt.services;
 
 import com.jwt.seguridad.spring.springbootjwt.entity.TutorialEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +24,6 @@ public interface ITutorialService {
     void deleteById(Long id);
 
     void deleteAll();
+
+    Page<TutorialEntity> findAll(Pageable pageable);
 }

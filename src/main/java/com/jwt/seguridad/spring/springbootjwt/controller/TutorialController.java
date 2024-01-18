@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -170,6 +172,12 @@ public class TutorialController {
         return CustomResponseHandler.generateResponse("Listado de tutoriales publicados"
                 ,HttpStatus.OK, tutorials) ;
     }
+
+    @GetMapping("/tutorial/pages")
+    public Page<TutorialEntity> getAllTutorials(Pageable pageable) {
+        return tutorialService.findAll(pageable);
+    }
+
 
     private TutorialDto mapToTutorialDto(TutorialEntity tutorial) {
         return tutorialMapper.mapTo(tutorial);
